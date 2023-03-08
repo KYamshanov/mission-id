@@ -6,7 +6,7 @@ services:
     container_name: 'mission-id'
     networks:
       - mission-gateway_mission
-      - database_database
+      - mission-db_postgres
     environment:
       POSTGRES_HOST: postgres-project
       POSTGRES_PORT: 5432
@@ -18,5 +18,5 @@ services:
 networks:
   mission-gateway_mission:
     external: true
-  database_database:
+  mission-db_postgres:
     external: true
