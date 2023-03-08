@@ -29,6 +29,9 @@ dependencies {
     implementation("org.postgresql:r2dbc-postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
+
+    //JWT
+    implementation("com.auth0:java-jwt:4.0.0")
 }
 
 tasks.withType<KotlinCompile> {
