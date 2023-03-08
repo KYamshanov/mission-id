@@ -1,16 +1,16 @@
 version: '1.0'
 
 services:
-  mission-id:
+  identify:
     build: ./
     container_name: 'mission-id'
     networks:
       - mission-gateway_mission
       - mission-db_postgres
     environment:
-      POSTGRES_HOST: postgres-project
+      POSTGRES_HOST: mission-postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: mission-project
+      POSTGRES_DATABASE: mission-postgres
       POSTGRES_SCHEMA: public
       POSTGRES_PASSWORD: private_password
       POSTGRES_USERNAME: postgres

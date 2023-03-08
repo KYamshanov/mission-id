@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service
 import ru.kyamshanov.mission.project.mission_id.exception.VerifyingException
 import ru.kyamshanov.mission.project.mission_id.models.AuthenticationSystem
 import ru.kyamshanov.mission.project.mission_id.models.IdToken
+import ru.kyamshanov.mission.project.mission_id.models.UserInfo
 
 internal interface TokenInteractor {
 
     fun generate(accessId: String, internalId: String, authenticationSystem: AuthenticationSystem): IdToken
 
-    fun verify(idToken: IdToken): Result<Unit>
+    fun verify(idToken: IdToken, authenticationSystem: AuthenticationSystem): Result<UserInfo>
 }
 
 @Component
@@ -30,13 +31,18 @@ private class TokenInteractorImpl @Autowired constructor(
             .sign(algorithm)
             .let { IdToken(it) }
 
-    override fun verify(idToken: IdToken): Result<Unit> = runCatching {
-        try {
-            jwtVerifier.verify(idToken.value)
-        } catch (e: Exception) {
-            throw VerifyingException(cause = e)
+    override fun verify(idToken: IdToken, authenticationSystem: AuthenticationSystem): Result<UserInfo> =
+        runCatching {
+            try {
+                val decodedJWT = jwtVerifier.verify(idToken.value)
+                if (decodedJWT.getClaim(AUTHENTICATION_SYSTEM_CLAIM).asString() != authenticationSystem.toClaim()) {
+                    throw VerifyingException("Authentication system in token is not related to the one currently used")
+                }
+                UserInfo(internalId = decodedJWT.subject, accessId = decodedJWT.id)
+            } catch (e: Exception) {
+                throw VerifyingException(cause = e)
+            }
         }
-    }
 
     private fun AuthenticationSystem.toClaim(): String = when (this) {
         AuthenticationSystem.MISSION -> "MIS"

@@ -7,34 +7,24 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import ru.kyamshanov.mission.project.mission_id.endpoint.dto.IdentifyRqDto
-import ru.kyamshanov.mission.project.mission_id.endpoint.dto.IdentifyRsDto
 import ru.kyamshanov.mission.project.mission_id.endpoint.dto.VerifyRqDto
+import ru.kyamshanov.mission.project.mission_id.endpoint.dto.VerifyRsDto
 import ru.kyamshanov.mission.project.mission_id.models.AuthenticationSystem
 import ru.kyamshanov.mission.project.mission_id.models.IdToken
-import ru.kyamshanov.mission.project.mission_id.service.IdentifyingService
 import ru.kyamshanov.mission.project.mission_id.service.VerifyingService
 
 @RestController
 @RequestMapping("/internal/id/mission/")
-internal class MissionAuthController @Autowired constructor(
-    private val identifyingService: IdentifyingService,
+internal class MissionAuthInternalController @Autowired constructor(
     private val verifyingService: VerifyingService
 ) {
-
-    @PostMapping("identify")
-    suspend fun identify(
-        @RequestBody(required = true) body: IdentifyRqDto
-    ): ResponseEntity<IdentifyRsDto> {
-        val idToken = identifyingService.identify(body.externalUserId, body.accessId, AuthenticationSystem.MISSION)
-        return ResponseEntity(IdentifyRsDto(idToken = idToken.value), HttpStatus.OK)
-    }
 
     @PostMapping("verify")
     suspend fun verify(
         @RequestBody(required = true) body: VerifyRqDto
-    ): ResponseEntity<Unit> {
-        verifyingService.verify(IdToken((body.idToken))).getOrThrow()
-        return ResponseEntity(HttpStatus.OK)
+    ): ResponseEntity<VerifyRsDto> {
+        val userInfo = verifyingService.verify(IdToken((body.idToken)), AuthenticationSystem.MISSION).getOrThrow()
+        val response = VerifyRsDto(internalId = userInfo.internalId, accessId = userInfo.accessId)
+        return ResponseEntity(response, HttpStatus.OK)
     }
 }

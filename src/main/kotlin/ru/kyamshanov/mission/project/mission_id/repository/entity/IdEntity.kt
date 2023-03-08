@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import ru.kyamshanov.mission.project.mission_id.models.AuthenticationSystem
 
-@Table("roles")
+@Table("mission_id_table")
 internal data class IdEntity(
     @Column("external_id")
     val externalId: String,
