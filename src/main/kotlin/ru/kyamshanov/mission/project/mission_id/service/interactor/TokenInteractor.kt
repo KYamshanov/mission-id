@@ -35,11 +35,14 @@ private class TokenInteractorImpl @Autowired constructor(
         runCatching {
             try {
                 val decodedJWT = jwtVerifier.verify(idToken.value)
-                if (decodedJWT.getClaim(AUTHENTICATION_SYSTEM_CLAIM).asString() != authenticationSystem.toClaim()) {
-                    throw VerifyingException("Authentication system in token is not related to the one currently used")
+                val authenticationClaim = decodedJWT.getClaim(AUTHENTICATION_SYSTEM_CLAIM).asString()
+                val requiredAuthenticationClaim = authenticationSystem.toClaim()
+                if (authenticationClaim != requiredAuthenticationClaim) {
+                    throw VerifyingException("Authentication system in token is not related to the one currently used. Required: $requiredAuthenticationClaim; actual: $authenticationClaim")
                 }
                 UserInfo(internalId = decodedJWT.subject, accessId = decodedJWT.id)
             } catch (e: Exception) {
+                e.printStackTrace()
                 throw VerifyingException(cause = e)
             }
         }
